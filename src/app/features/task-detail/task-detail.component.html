@@ -1,0 +1,152 @@
+<div class="task-detail-container">
+  <div *ngIf="loading" class="loading-state">Loading...</div>
+
+  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <div class="detail-header">
+      <h1>{{ isEditing ? 'Edit Task' : 'New Task' }}</h1>
+      <a routerLink="/tasks" class="btn btn-secondary">Back to Tasks</a>
+    </div>
+
+    <!-- Form Fields -->
+    <div class="form-container">
+      <!-- Title Field -->
+      <div class="form-group">
+        <label for="title">Title *</label>
+        <input 
+          id="title"
+          type="text"
+          formControlName="title"
+          placeholder="Enter task title..."
+          class="form-control"
+          [class.error]="hasError(titleControl, 'required') || hasError(titleControl, 'minlength')"
+        />
+        <div class="error-message" *ngIf="hasError(titleControl, 'required')">
+          {{ getErrorMessage(titleControl, 'required') }}
+        </div>
+        <div class="error-message" *ngIf="hasError(titleControl, 'minlength')">
+          {{ getErrorMessage(titleControl, 'minlength') }}
+        </div>
+      </div>
+
+      <!-- Description Field -->
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea 
+          id="description"
+          formControlName="description"
+          placeholder="Enter task description..."
+          rows="4"
+          class="form-control textarea"
+        ></textarea>
+      </div>
+
+      <!-- Status and Priority Fields -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="status">Status *</label>
+          <select 
+            id="status"
+            formControlName="status"
+            class="form-control select"
+            [class.error]="hasError(statusControl, 'required')"
+          >
+            <option *ngFor="let status of statuses" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+          <div class="error-message" *ngIf="hasError(statusControl, 'required')">
+            {{ getErrorMessage(statusControl, 'required') }}
+          </div>
+        </div>
+
+        <div class="form-group half-width">
+          <label for="priority">Priority *</label>
+          <select 
+            id="priority"
+            formControlName="priority"
+            class="form-control select"
+            [class.error]="hasError(priorityControl, 'required')"
+          >
+            <option *ngFor="let priority of priorities" [value]="priority.value">
+              {{ priority.label }}
+            </option>
+          </select>
+          <div class="error-message" *ngIf="hasError(priorityControl, 'required')">
+            {{ getErrorMessage(priorityControl, 'required') }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Due Date Field -->
+      <div class="form-group">
+        <label for="dueDate">Due Date</label>
+        <input 
+          id="dueDate"
+          type="date"
+          formControlName="dueDate"
+          class="form-control date-input"
+          [class.error]="hasError(dueDateControl, 'pastDue')"
+        />
+        <div class="error-message" *ngIf="hasError(dueDateControl, 'pastDue')">
+          {{ getErrorMessage(dueDateControl, 'pastDue') }}
+        </div>
+      </div>
+
+      <!-- Tags FieldArray -->
+      <div class="form-group">
+        <label>Tags</label>
+        <div formArrayName="tags" class="tags-container">
+          <div 
+            *ngFor="let tag of getTagControls(); let i = index"
+            class="tag-input-wrapper"
+          >
+            <input 
+              [formControlName]="i"
+              type="text"
+              placeholder="Enter a tag..."
+              class="form-control tag-input"
+            />
+            <button 
+              type="button"
+              (click)="removeTag(i)"
+              class="btn-remove-tag"
+              title="Remove tag"
+            >✕</button>
+          </div>
+        </div>
+        <button type="button" (click)="addTag()" class="btn btn-secondary btn-sm">+ Add Tag</button>
+
+        <!-- Preview of current tags -->
+        <div *ngIf="getTagControls().length > 0" class="tag-preview">
+          <span class="preview-label">Tags:</span>
+          <span 
+            *ngFor="let tagControl of getTagControls()"
+            [class]="{ 'tag-item': true, empty: !tagControl.value || tagControl.value.trim() === '' }"
+          >
+            {{ tagControl.value?.trim() }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="taskForm.invalid || taskForm.pristine">
+          {{ isEditing ? 'Update Task' : 'Create Task' }}
+        </button>
+        
+        <button type="button" (click)="onCancel()" class="btn btn-secondary">
+          Cancel
+        </button>
+
+        <button 
+          *ngIf="isEditing && currentTask"
+          type="button"
+          (click)="onDelete()"
+          class="btn btn-danger"
+        >
+          Delete Task
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

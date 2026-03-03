@@ -1,0 +1,127 @@
+<div class="task-list-container">
+  <div class="list-header">
+    <h1>Task List</h1>
+    <a routerLink="/tasks/new" class="btn btn-primary">+ New Task</a>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-panel">
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Search tasks..." 
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()"
+        class="form-control search-input"
+      />
+    </div>
+
+    <div class="filter-group">
+      <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="form-control filter-select">
+        <option [value]="null">All Status</option>
+        <option *ngFor="let status of statuses" [value]="status.value">{{ status.label }}</option>
+      </select>
+
+      <select [(ngModel)]="selectedPriority" (change)="onFilterChange()" class="form-control filter-select">
+        <option [value]="null">All Priority</option>
+        <option *ngFor="let priority of priorities" [value]="priority.value">{{ priority.label }}</option>
+      </select>
+
+      <button 
+        (click)="toggleOverdueOnly()" 
+        class="form-control filter-btn"
+        [class.active]="showOverdueOnly">
+        ⚠️ Overdue Only
+      </button>
+
+      <button (click)="clearFilters()" class="btn btn-secondary btn-sm">Clear Filters</button>
+    </div>
+  </div>
+
+  <!-- Sorting Options -->
+  <div class="sorting-bar" *ngIf="filteredTasks.length > 0">
+    <span class="sort-label">Sort by:</span>
+    <button 
+      (click)="toggleSort('dueDate')" 
+      class="sort-btn"
+      [class.active]="sortField === 'dueDate'">
+      Due Date {{ getSortIcon('dueDate') }}
+    </button>
+    <button 
+      (click)="toggleSort('createdDate')" 
+      class="sort-btn"
+      [class.active]="sortField === 'createdDate'">
+      Created {{ getSortIcon('createdDate') }}
+    </button>
+    <button 
+      (click)="toggleSort('priority')" 
+      class="sort-btn"
+      [class.active]="sortField === 'priority'">
+      Priority {{ getSortIcon('priority') }}
+    </button>
+  </div>
+
+  <!-- Tags Filter -->
+  <div class="tags-filter" *ngIf="getUniqueTags().length > 0">
+    <span class="filter-label">Filter by tags:</span>
+    <div class="tag-chips">
+      <button 
+        *ngFor="let tag of getUniqueTags()" 
+        (click)="searchQuery = tag; onSearchChange();"
+        class="tag-chip"
+        [class.active]="searchQuery === tag">
+        {{ tag }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Task Cards -->
+  <div class="task-cards-grid">
+    <div *ngIf="filteredTasks.length === 0" class="empty-state">
+      <p class="empty-message">No tasks found</p>
+      <a routerLink="/tasks/new" class="btn btn-primary">Create Your First Task</a>
+    </div>
+
+    <div 
+      *ngFor="let task of filteredTasks" 
+      class="task-card"
+      [class.overdue]="isOverdue(task)">
+      
+      <div class="task-header">
+        <h3 class="task-title">{{ task.title }}</h3>
+        <span 
+          class="task-status-badge"
+          [style.background]="getStatusColor(task.status)"
+          [style.color]="task.status === 'done' ? '#fff' : '#000'">
+          {{ getStatusLabel(task.status) }}
+        </span>
+      </div>
+
+      <p class="task-description">{{ task.description }}</p>
+
+      <div class="task-meta">
+        <div class="meta-item priority" [style.color]="getPriorityColor(task.priority)">
+          ⭐ Priority: {{ getPriorityLabel(task.priority) }}
+        </div>
+        
+        <div class="meta-item due-date" [class.overdue]="isOverdue(task)">
+          📅 Due: {{ formatDate(task.dueDate) }}
+        </div>
+
+        <div class="task-tags">
+          <span *ngFor="let tag of task.tags.slice(0, 3)" class="tag-badge">{{ tag }}</span>
+          <span *ngIf="task.tags.length > 3" class="tag-more">+{{ task.tags.length - 3 }}</span>
+        </div>
+      </div>
+
+      <div class="task-actions">
+        <a routerLink="/tasks/{{ task.id }}" class="btn btn-secondary btn-sm">View Details</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Count -->
+  <div class="task-count" *ngIf="filteredTasks.length > 0">
+    Showing {{ filteredTasks.length }} of {{ tasks.length }} task(s)
+  </div>
+</div>
