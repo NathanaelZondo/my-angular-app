@@ -1,1 +1,18 @@
+@if (isAuthenticated()) {
+  <nav class="app-nav">
+    <div class="nav-brand">Smart Task Manager</div>
+    <ul class="nav-links">
+      <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+      <li><a routerLink="/tasks" routerLinkActive="active">Tasks</a></li>
+      <li><a routerLink="/tasks/new" routerLinkActive="active">New Task</a></li>
+    </ul>
+    <div class="nav-actions">
+      @if (currentUserSignal()) {
+        <span class="user-name">{{ currentUserSignal()!.email }}</span>
+      }
+      <button class="btn-logout" (click)="onLogout()">Logout</button>
+    </div>
+  </nav>
+}
+
 <router-outlet />

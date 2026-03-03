@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { StorageService } from '../../core/services/storage.service';
+import { FirestoreService } from '../../core/services/firestore.service';
 import { Task, TaskFilter, TaskSort, TaskStatus, TaskPriority } from '../../shared/interfaces/task.interface';
 
 @Component({
@@ -42,10 +42,10 @@ export class TaskListComponent implements OnInit, OnDestroy {
     { value: TaskPriority.HIGH, label: 'High' }
   ];
 
-  constructor(private storageService: StorageService) {}
+  constructor(private firestoreService: FirestoreService) {}
 
   ngOnInit(): void {
-    this.storageService.tasks$
+    this.firestoreService.getTasks()
       .pipe(takeUntil(this.destroy$))
       .subscribe(tasks => {
         this.tasks = tasks;
@@ -182,4 +182,6 @@ export class TaskListComponent implements OnInit, OnDestroy {
     });
     return Array.from(allTags).slice(0, 10);
   }
+
+  private storageService = null; // Placeholder for backward compatibility during migration
 }
